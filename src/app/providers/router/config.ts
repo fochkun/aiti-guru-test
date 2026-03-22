@@ -1,7 +1,7 @@
 ﻿import type { RouteObject } from 'react-router-dom'
-import { AuthPage } from '../../../pages/auth/ui/AuthPage'
-import { ProductsPage } from '../../../pages/products/ui/ProductsPage'
-import { NotFoundPage } from '../../../pages/not-found/ui/NotFoundPage'
+import { AuthPage } from '../../../pages/auth/ui/auth-page'
+import { ProductsPage } from '../../../pages/products/ui/products-page'
+import { NotFoundPage } from '../../../pages/not-found/ui/not-found-page'
 
 export const routes: RouteObject[] = [
   {

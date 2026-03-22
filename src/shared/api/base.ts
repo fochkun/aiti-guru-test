@@ -30,7 +30,7 @@ export class ApiClient {
         ...headers,
       },
       signal,
-      credentials: 'include',
+      // credentials: 'include',
     });
 
     const data = await response.json();

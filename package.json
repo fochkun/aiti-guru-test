@@ -8,12 +8,15 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "format": "prettier --write \"src/**/*.{ts,tsx}\""
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "start:proxy": "node ./helpers/dummy-proxy.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@tailwindcss/vite": "^4.2.1",
     "clsx": "^2.1.1",
+    "express": "^5.2.1",
+    "http-proxy-middleware": "^3.0.5",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-hook-form": "^7.71.2",
