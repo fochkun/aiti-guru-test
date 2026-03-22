@@ -1,104 +1,95 @@
-﻿import { useState } from 'react';
+﻿import { useEffect } from 'react';
 import { ProductTable } from '../../../widgets/product-table';
 import { Pagination } from '../../../widgets/pagination';
 import { SearchInput } from '../../../features/products/search';
-import { EditProductModal } from '../../../features/products/edit';
-import type { Product } from '../../../entities/product/model/types';
-import { AddProductModal } from '../../../features/products/add';
+import { useProductStore } from '../../../entities/product';
+import type { Product } from '../../../entities/product';
 
 const ITEMS_PER_PAGE = 20;
 
 export const ProductsPage = () => {
-  const [products] = useState<Product[]>([]);
-  const [loading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [currentSort, setCurrentSort] = useState<{ key: keyof Product; order: 'asc' | 'desc' } | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalItems] = useState(120);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const {
+    products,
+    total,
+    loading,
+    error,
+    filters,
+    loadProducts,
+    setFilters,
+  } = useProductStore();
 
-  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
+
+  // Загрузка при монтировании
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
+  // Загрузка при изменении фильтров
+  useEffect(() => {
+    loadProducts();
+  }, [filters.page, filters.search, filters.sortBy, filters.sortOrder]);
 
   const handleSort = (key: keyof Product) => {
-    setCurrentSort(prev => ({
-      key,
-      order: prev?.key === key && prev.order === 'asc' ? 'desc' : 'asc'
-    }));
+    const newOrder =
+      filters.sortBy === key && filters.sortOrder === 'asc' ? 'desc' : 'asc';
+    setFilters({ sortBy: key, sortOrder: newOrder, page: 1 });
+  };
+
+  const handleSearch = (value: string) => {
+    setFilters({ search: value, page: 1 });
+  };
+
+  const handlePageChange = (page: number) => {
+    setFilters({ page });
+  };
+
+  const handleReload = () => {
+    loadProducts();
   };
 
   const handleEdit = (product: Product) => {
-    setEditingProduct(product);
-    setIsEditModalOpen(true);
+    console.log('Edit product:', product);
   };
 
   const handleDelete = (id: number) => {
     console.log('Delete product:', id);
   };
 
-  const handleReload = () => {
-    console.log('Reload products');
-    // Здесь будет вызов API
-  };
-
-  const handleAdd = () => {
-    setIsAddModalOpen(true);
-  };
-
-  const handleAddSubmit = (data: any) => {
-    console.log('Add product:', data);
-    setIsAddModalOpen(false);
-  };
-
-  const handleEditSubmit = (data: any) => {
-    console.log('Edit product:', data);
-    setIsEditModalOpen(false);
-  };
-
   return (
     <main className="min-h-screen bg-gray-50 p-6">
       <div className="mx-auto max-w-7xl space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">Товары</h1>
-        </div>
-
         <div className="flex items-center gap-4">
-          <SearchInput value={searchQuery} onChange={setSearchQuery} />
+          <SearchInput value={filters.search || ''} onChange={handleSearch} />
         </div>
 
         <ProductTable
           products={products}
           loading={loading}
-          currentSort={currentSort}
+          currentSort={
+            filters.sortBy ? { key: filters.sortBy, order: filters.sortOrder || 'asc' } : null
+          }
           onSort={handleSort}
           onEdit={handleEdit}
           onDelete={handleDelete}
           onReload={handleReload}
-          onAdd={handleAdd}
+          onAdd={() => {}}
         />
+
+        {error && (
+          <div className="rounded-md bg-red-50 p-4 text-red-600">
+            {error}
+          </div>
+        )}
 
         <Pagination
-          currentPage={currentPage}
+          currentPage={filters.page || 1}
           totalPages={totalPages}
           itemsPerPage={ITEMS_PER_PAGE}
-          totalItems={totalItems}
-          onPageChange={setCurrentPage}
+          totalItems={total}
+          onPageChange={handlePageChange}
         />
       </div>
-
-      <AddProductModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onSubmit={handleAddSubmit}
-      />
-
-      <EditProductModal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        onSubmit={handleEditSubmit}
-        product={editingProduct || undefined}
-      />
     </main>
   );
 };

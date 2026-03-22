@@ -1,13 +1,11 @@
 ﻿import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { toast } from 'sonner';
-import type { AuthStore, LoginResponse } from './types';
+import type { AuthState, AuthActions, LoginResponse } from './types';
 import { authStorage } from './auth-storage';
+import { ACCESS_TOKEN_LIFETIME, API_BASE_URL, REFRESH_TOKEN_LIFETIME } from '../../../shared/constants';
 
-const ACCESS_TOKEN_LIFETIME = 60 * 60 * 1000;
-const REFRESH_TOKEN_LIFETIME = 7 * 24 * 60 * 60 * 1000;
-
-const initialState: Omit<AuthStore, keyof AuthActions> = {
+const initialState: AuthState = {
   id: 0,
   username: '',
   email: '',
@@ -23,7 +21,7 @@ const initialState: Omit<AuthStore, keyof AuthActions> = {
   isAuthenticated: false,
 };
 
-export const useAuthStore = create<AuthStore>()(
+export const useAuthStore = create<AuthState & AuthActions>()(
   persist(
     (set, get) => ({
       ...initialState,
@@ -58,8 +56,8 @@ export const useAuthStore = create<AuthStore>()(
 
       logout: () => {
         set(initialState);
-        toast.error('РЎРµСЃСЃРёСЏ РёСЃС‚РµРєР»Р°', {
-          description: 'РџРѕР¶Р°Р»СѓР№СЃС‚Р°, Р°РІС‚РѕСЂРёР·СѓР№С‚РµСЃСЊ Р·Р°РЅРѕРІРѕ',
+        toast.error('Сессия истекла', {
+          description: 'Пожалуйста, авторизуйтесь заново',
         });
       },
 
@@ -86,7 +84,7 @@ export const useAuthStore = create<AuthStore>()(
         }
 
         try {
-          const response = await fetch('https://dummyjson.com/auth/refresh', {
+          const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ refreshToken }),

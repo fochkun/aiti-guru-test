@@ -1,4 +1,5 @@
 ﻿import { useAuthStore } from '../../entities/user';
+import { API_BASE_URL } from '../constants';
 
 export class ApiError extends Error {
   constructor(
@@ -17,14 +18,12 @@ export interface RequestOptions extends RequestInit {
 }
 
 export class ApiClient {
-  private baseURL: string;
 
-  constructor(baseURL?: string) {
-    this.baseURL = baseURL || import.meta.env.VITE_API_BASE_URL || 'https://dummyjson.com';
+  constructor() {
   }
 
   private async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
-    const { baseURL = this.baseURL, headers = {}, signal, skipAuth, ...restOptions } = options;
+    const { baseURL = API_BASE_URL, headers = {}, signal, skipAuth, ...restOptions } = options;
 
     let accessToken: string | null = null;
     if (!skipAuth) {
