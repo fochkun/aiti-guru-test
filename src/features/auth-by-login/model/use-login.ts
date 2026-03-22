@@ -1,7 +1,7 @@
 ﻿import { useState } from 'react';
 import { api } from '../../../shared/api';
-import type { LoginCredentials, LoginResponse } from '../../../entities/user';
 import { useAuthStore } from '../../../entities/user';
+import type { LoginCredentials, LoginResponse } from '../../../entities/user';
 
 export const useLogin = () => {
   const login = useAuthStore((state) => state.login);
@@ -13,10 +13,8 @@ export const useLogin = () => {
     setError(null);
 
     try {
-      const data = await api.post<LoginResponse>('/auth/login', credentials);
-      
-      login({ ...data, remember });
-      
+      const data = await api.public.post<LoginResponse>('/auth/login', credentials);
+      login(data, remember);
       return { success: true as const };
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Login failed';

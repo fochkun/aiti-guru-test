@@ -1,3 +1,5 @@
+﻿import { useAuthStore } from '../../entities/user';
+
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -11,6 +13,7 @@ export class ApiError extends Error {
 
 export interface RequestOptions extends RequestInit {
   baseURL?: string;
+  skipAuth?: boolean;
 }
 
 export class ApiClient {
@@ -21,12 +24,28 @@ export class ApiClient {
   }
 
   private async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
-    const { baseURL = this.baseURL, headers = {}, signal, ...restOptions } = options;
+    const { baseURL = this.baseURL, headers = {}, signal, skipAuth, ...restOptions } = options;
+
+    let accessToken: string | null = null;
+    if (!skipAuth) {
+      const store = useAuthStore.getState();
+      
+      if (store.isAccessTokenExpired()) {
+        const refreshed = await store.refreshTokens();
+        if (!refreshed) {
+          store.logout();
+          throw new ApiError(401, 'Session expired');
+        }
+      }
+
+      accessToken = store.getAccessToken();
+    }
 
     const response = await fetch(`${baseURL}${endpoint}`, {
       ...restOptions,
       headers: {
         'Content-Type': 'application/json',
+        ...(accessToken && !skipAuth && { Authorization: `Bearer ${accessToken}` }),
         ...headers,
       },
       signal,
@@ -46,12 +65,24 @@ export class ApiClient {
     return data;
   }
 
-  get<T>(endpoint: string, options?: RequestOptions) {
-    return this.request<T>(endpoint, { ...options, method: 'GET' });
+  public get public() {
+    return {
+      get: <T>(endpoint: string, options?: RequestOptions) =>
+        this.request<T>(endpoint, { ...options, skipAuth: true, method: 'GET' }),
+      
+      post: <T>(endpoint: string, body: unknown, options?: RequestOptions) =>
+        this.request<T>(endpoint, { ...options, skipAuth: true, method: 'POST', body: JSON.stringify(body) }),
+    };
   }
 
-  post<T>(endpoint: string, body: unknown, options?: RequestOptions) {
-    return this.request<T>(endpoint, { ...options, method: 'POST', body: JSON.stringify(body) });
+  public get private() {
+    return {
+      get: <T>(endpoint: string, options?: RequestOptions) =>
+        this.request<T>(endpoint, { ...options, skipAuth: false, method: 'GET' }),
+      
+      post: <T>(endpoint: string, body: unknown, options?: RequestOptions) =>
+        this.request<T>(endpoint, { ...options, skipAuth: false, method: 'POST', body: JSON.stringify(body) }),
+    };
   }
 }
 
