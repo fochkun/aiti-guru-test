@@ -10,8 +10,10 @@ import { AddProductModal } from '../../../features/products/add';
 import { EditProductModal } from '../../../features/products/edit';
 import type { ProductFormData } from '../../../features/products/add/model/types';
 import { toast } from 'sonner';
+import { useDebounce } from '../../../shared';
 
 const ITEMS_PER_PAGE = 20;
+const SEARCH_DEBOUNCE_DELAY = 500;
 
 export const ProductsPage = () => {
   const {
@@ -27,6 +29,9 @@ export const ProductsPage = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const debouncedSearchQuery = useDebounce(searchQuery, SEARCH_DEBOUNCE_DELAY);
 
   const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
 
@@ -40,7 +45,11 @@ export const ProductsPage = () => {
 
   useEffect(() => {
     loadProducts();
-  }, [filters.page, filters.search, filters.sortBy, filters.sortOrder, loadProducts]);
+  }, [filters.page, debouncedSearchQuery, filters.search, filters.sortBy, filters.sortOrder, loadProducts]);
+
+  useEffect(() => {
+    setFilters({ search: debouncedSearchQuery, page: 1 });
+  }, [debouncedSearchQuery, setFilters]);
 
   const handleSort = (key: SortField) => {
     const newOrder =
@@ -49,7 +58,7 @@ export const ProductsPage = () => {
   };
 
   const handleSearch = (value: string) => {
-    setFilters({ search: value, page: 1 });
+    setSearchQuery(value);
   };
 
   const handlePageChange = (page: number) => {
@@ -85,7 +94,7 @@ export const ProductsPage = () => {
     <main className="min-h-screen bg-gray-50 p-6">
       <div className="mx-auto max-w-7xl space-y-6">
         <div className="flex items-center gap-4">
-          <SearchInput value={filters.search || ''} onChange={handleSearch} />
+          <SearchInput value={searchQuery} onChange={handleSearch} />
         </div>
 
         <ProductTable

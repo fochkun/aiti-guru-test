@@ -1,7 +1,7 @@
 ﻿import { useState } from 'react';
-import { Modal } from '../../../../shared/ui/modal';
-import { Input } from '../../../../shared/ui/input';
-import { Button } from '../../../../shared/ui/button';
+import { Modal } from '../../../../shared';
+import { Input } from '../../../../shared';
+import { Button } from '../../../../shared';
 import { type ProductFormData, RATING_MIN, RATING_MAX } from '../../add/model/types';
 import type { Product } from '../../../../entities/product/model/types';
 
