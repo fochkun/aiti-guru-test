@@ -3,11 +3,10 @@
 interface ProductTableRowProps {
   product: Product;
   onEdit: (product: Product) => void;
-  onDelete: (id: number) => void;
 }
 
-export const ProductTableRow = ({ product, onEdit, onDelete }: ProductTableRowProps) => {
-  const isLowRating = product.rating < 3;
+export const ProductTableRow = ({ product, onEdit }: ProductTableRowProps) => {
+  const isLowRating = product.rating <= 3.5;
 
   return (
     <tr className="border-b hover:bg-gray-50">
@@ -19,11 +18,18 @@ export const ProductTableRow = ({ product, onEdit, onDelete }: ProductTableRowPr
       </td>
       <td className="px-4 py-3 text-sm text-gray-900">{product.price.toFixed(2)} ₽</td>
       <td className="px-4 py-3 text-right text-sm">
-        <button onClick={() => onEdit(product)} className="text-indigo-600 hover:text-indigo-900 mr-3">
-          Редактировать
+        <button
+          onClick={() => onEdit(product)}
+          className="text-indigo-600 hover:text-indigo-900 mr-3"
+        >
+          +
         </button>
-        <button onClick={() => onDelete(product.id)} className="text-red-600 hover:text-red-900">
-          Удалить
+        <button
+          onClick={() => {}}
+          className="text-gray-400 hover:text-gray-600 mr-3"
+          title="Ещё"
+        >
+          ⋮
         </button>
       </td>
     </tr>

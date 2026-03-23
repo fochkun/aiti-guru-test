@@ -1,11 +1,11 @@
-﻿type SortKey = 'title' | 'price' | 'rating' | 'brand';
-type SortOrder = 'asc' | 'desc';
+﻿import type { SortField } from '../../../../entities/product/model/types';
+import type { SortConfig } from '../model/types';
 
 interface SortHeaderProps {
-  column: SortKey;
+  column: SortField;
   label: string;
-  currentSort: { key: SortKey; order: SortOrder } | null;
-  onSort: (key: SortKey) => void;
+  currentSort: SortConfig | null;
+  onSort: (key: SortField) => void;
 }
 
 export const SortHeader = ({ column, label, currentSort, onSort }: SortHeaderProps) => {
@@ -21,7 +21,7 @@ export const SortHeader = ({ column, label, currentSort, onSort }: SortHeaderPro
         {label}
         {isActive && (
           <span className="text-indigo-600">
-            {order === 'asc' ? 'в†‘' : 'в†“'}
+            {order === 'asc' ? '↑' : '↓'}
           </span>
         )}
       </div>

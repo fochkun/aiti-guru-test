@@ -1,17 +1,17 @@
 ﻿import { Loader } from '../../../shared/ui/loader';
 import { ProductTableHeader } from './product-table-header';
 import { ProductTableRow } from './product-table-row';
-import type { Product } from '../../../entities/product/model/types';
 import { AddProductButton } from '../../../features/products/add';
 import { ReloadButton } from '../../../shared/ui/reload-button';
+import type { SortConfig } from '../../../features/products/sort/model/types';
+import type { Product, SortField } from '../../../entities/product/model/types';
 
 interface ProductTableProps {
   products: Product[];
   loading: boolean;
-  currentSort: { key: keyof Product; order: 'asc' | 'desc' } | null;
-  onSort: (key: keyof Product) => void;
+  currentSort: SortConfig | null;
+  onSort: (key: SortField) => void;
   onEdit: (product: Product) => void;
-  onDelete: (id: number) => void;
   onReload: () => void;
   onAdd: () => void;
 }
@@ -22,7 +22,6 @@ export const ProductTable = ({
   currentSort, 
   onSort,
   onEdit,
-  onDelete,
   onReload,
   onAdd
 }: ProductTableProps) => {
@@ -47,7 +46,6 @@ export const ProductTable = ({
               key={product.id}
               product={product}
               onEdit={onEdit}
-              onDelete={onDelete}
             />
           ))}
         </tbody>

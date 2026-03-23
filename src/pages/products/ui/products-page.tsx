@@ -1,9 +1,15 @@
-﻿import { useEffect } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { ProductTable } from '../../../widgets/product-table';
 import { Pagination } from '../../../widgets/pagination';
 import { SearchInput } from '../../../features/products/search';
 import { useProductStore } from '../../../entities/product';
+import { type SortConfig } from '../../../features/products/sort/model/types';
 import type { Product } from '../../../entities/product';
+import type { SortField } from '../../../entities/product/model/types';
+import { AddProductModal } from '../../../features/products/add';
+import { EditProductModal } from '../../../features/products/edit';
+import type { ProductFormData } from '../../../features/products/add/model/types';
+import { toast } from 'sonner';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -18,19 +24,25 @@ export const ProductsPage = () => {
     setFilters,
   } = useProductStore();
 
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+
   const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
 
-  // Загрузка при монтировании
+  const currentSort: SortConfig | null = filters.sortBy
+    ? { key: filters.sortBy, order: filters.sortOrder || 'asc' }
+    : null;
+
   useEffect(() => {
     loadProducts();
-  }, []);
+  }, [loadProducts]);
 
-  // Загрузка при изменении фильтров
   useEffect(() => {
     loadProducts();
-  }, [filters.page, filters.search, filters.sortBy, filters.sortOrder]);
+  }, [filters.page, filters.search, filters.sortBy, filters.sortOrder, loadProducts]);
 
-  const handleSort = (key: keyof Product) => {
+  const handleSort = (key: SortField) => {
     const newOrder =
       filters.sortBy === key && filters.sortOrder === 'asc' ? 'desc' : 'asc';
     setFilters({ sortBy: key, sortOrder: newOrder, page: 1 });
@@ -49,12 +61,25 @@ export const ProductsPage = () => {
   };
 
   const handleEdit = (product: Product) => {
-    console.log('Edit product:', product);
+    setEditingProduct(product);
+    setIsEditModalOpen(true);
   };
 
-  const handleDelete = (id: number) => {
-    console.log('Delete product:', id);
-  };
+  const handleAddSubmit = (data: ProductFormData) => {
+  console.log('Add product:', data);
+  toast.success('Товар успешно добавлен', {
+    description: `${data.title} (${data.sku})`,
+  });
+  setIsAddModalOpen(false);
+};
+
+  const handleEditSubmit = (data: ProductFormData) => {
+  console.log('Edit product:', data);
+  toast.success('Товар успешно обновлён', {
+    description: `${data.title} (${data.sku})`,
+  });
+  setIsEditModalOpen(false);
+};
 
   return (
     <main className="min-h-screen bg-gray-50 p-6">
@@ -66,14 +91,11 @@ export const ProductsPage = () => {
         <ProductTable
           products={products}
           loading={loading}
-          currentSort={
-            filters.sortBy ? { key: filters.sortBy, order: filters.sortOrder || 'asc' } : null
-          }
+          currentSort={currentSort}
           onSort={handleSort}
           onEdit={handleEdit}
-          onDelete={handleDelete}
           onReload={handleReload}
-          onAdd={() => {}}
+          onAdd={() => setIsAddModalOpen(true)}
         />
 
         {error && (
@@ -90,6 +112,19 @@ export const ProductsPage = () => {
           onPageChange={handlePageChange}
         />
       </div>
+
+      <AddProductModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSubmit={handleAddSubmit}
+      />
+
+      <EditProductModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onSubmit={handleEditSubmit}
+        product={editingProduct || undefined}
+      />
     </main>
   );
 };

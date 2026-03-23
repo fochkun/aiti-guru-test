@@ -1,4 +1,14 @@
-﻿export interface Product {
+﻿
+export enum SortField {
+  TITLE = 'title',
+  PRICE = 'price',
+  RATING = 'rating',
+  BRAND = 'brand',
+  SKU = 'sku'
+}
+
+export type SortOrder = 'asc' | 'desc';
+export interface Product {
   id: number;
   title: string;
   description: string;
@@ -22,8 +32,8 @@ export interface ProductsResponse {
 
 export interface ProductFilters {
   search?: string;
-  sortBy?: keyof Product;
-  sortOrder?: 'asc' | 'desc';
+  sortBy?: SortField;
+  sortOrder?: SortOrder;
   page?: number;
   limit?: number;
 }

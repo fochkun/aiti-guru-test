@@ -25,7 +25,7 @@ export const Pagination = ({
     const maxVisible = 5;
     
     let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
-    let end = Math.min(totalPages, start + maxVisible - 1);
+    const end = Math.min(totalPages, start + maxVisible - 1);
     
     // Корректируем start, если end уперся в конец
     if (end - start < maxVisible - 1) {
